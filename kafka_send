@@ -1,0 +1,15 @@
+#!/bin/bash
+
+BATCH=$1
+i=0
+echo -n "" > batch.json
+for f in *.top.json; do 
+    cat $f >> batch.json
+    i=$((i+1))
+    if (( i%BATCH == 0 )); then
+        OUTPUT="$(wc -l batch.json)"
+        echo "${OUTPUT}"
+        /home/ec2-user/kafka_2.9.1-0.8.2.2/bin/kafka-console-producer.sh --broker-list $KAFKA --topic simple1 < batch.json
+        echo -n "" > batch.json
+    fi
+done

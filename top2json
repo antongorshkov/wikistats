@@ -1,0 +1,19 @@
+#!/bin/bash
+
+for f in *.top; do 
+    if [ -f $f.json ]; then
+        continue
+    fi
+    f_notop=${f/.top/}
+    IFS='-' read -r -a array <<< "$f_notop"
+    date=${array[1]}
+    hour=${array[2]}
+    sort -k3 -n -r $f | grep -v -f exclude_terms | head -n 1001 | tail -1000 > $f.sort
+    while read p; do
+        IFS=' ' read -r -a tokens <<< "$p"
+        title=${tokens[1]}
+        count=${tokens[2]}
+        echo {\""title\"":\""$title\"", \""count\"":$count, \""time\"":\""${date:0:4}-${date:4:2}-${date:6:2} ${hour:0:2}:${hour:2:2}:${hour:4:2}\""}
+    done < $f.sort > $f.json
+    rm $f.sort
+done
